@@ -8,21 +8,123 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
+    <style>
+    #mazeContainer{
+        margin-top: 30px;
+        position: absolute;
+        /* display:block; */
+        width: 40%;
+        left: 0%;
+    }
+    #leaderboardContainer{
+        margin-top: 30px;
+        position: absolute;
+        /* background-color: tomato; */
+        left: 50%;
+        width: 40%;
+        border: 3px solid #73AD21;
+        /* padding: 10px; */
+    }
+
+    </style>
+
 </head>
 
 <body>
-<div class="container">
-    <div class="justify-content-center">
-        <div id="mazeBody"></div>
-        <canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;"></canvas>
+
+    <div class="container" id="mazeContainer">
+        <!-- <div class="justify-content-center"> -->
+            <form action="">				
+                <div class="form-group">
+                    <label>Username</label>
+                    <div id="usernamelabel"></div>
+                    <input type="text" name="username" id = "username" class="form-control" required="required">
+                </div>
+                <input type="submit" id="loginBtn" class="btn btn-primary" value="Play">
+            </form>
+
+            <div id="timer"></div>
+            <div id="moves"></div>
+            <div id="mazeBody">
+                <canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;"></canvas>
+            </div>
+            <h1><div id="msg"></div></h1>
+            <h2><div id="score"></div><h2>
+        <!-- </div> -->
     </div>
-<div>
+
+    <?php
+    $conn = new mysqli("localhost", "root", "", "maze");
+    if ($conn->connect_error) {
+        return "Connection failed: " . $conn->connect_error;
+    }
+    $sql = "SELECT * from highscore";
+    $result = $conn->query($sql);
+
+    if($result->num_rows > 0){
+        $board = array();
+        while($row = $result->fetch_assoc()){
+            array_push($board, $row);
+        }
+    }else{
+        return NULL;
+    }
+    $len = count($board);
+    echo '<script>console.log('.json_encode($board).')</script>';
+    for($i=0; $i<$len-1; $i++){
+        $max = $i;
+        for($j=$i+1; $j<$len; $j++){
+            if($board[$j]['HighScore']>$board[$max]['HighScore']){
+                $max = $j;
+            }
+        }
+        $temp = $board[$max];
+        $board[$max] = $board[$i];
+        $board[$i] = $temp;
+    }
+    echo '<script>console.log('.json_encode($board).')</script>';
 
 
+    $conn->close();
+    ?>
 
+    <div class="container" id="leaderboardContainer">
+    <table class="table table-striped">
+        <h1>Leader Board</h1>
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>High Score</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php 
+            // echo json_encode($board);
+            foreach($board as $user)
+            echo '<tr>
+                    <td>'.$user["username"].'</td>
+                    <td>'.$user["HighScore"].'</td>
+                </tr>';
+        ?>
+        </tbody>
+  </table>
+    </div>
 
     <script>
+    $(document).ready(function(){
+
     var maze1 = new Array(new Array(13, 6, 12, 7),new Array(14, 10, 10, 15),new Array(8, 0, 1, 6),new Array(11, 9, 7, 11));
+    var username;
+
+    $('#mazeBody').hide();
+    $('#loginBtn').click(function(e){
+        e.preventDefault();
+        $('#mazeBody').show();
+        username = $('#username').val();
+        $('#usernamelabel').text(username);
+        $('#username').remove();
+        $('#loginBtn').remove();
+    });
 
     var width = 100;
     var runnerX = 150;
@@ -34,11 +136,50 @@
     var startPt = 100;  
     var undoStack = new Array();
     var redoStack = new Array();
+    var moves=0;
 
     drawMaze();    
     drawRunner(runnerX, runnerY);
     drawFinish();
+    displayMoves();
 
+    
+        // var time = 10;
+        // var timercount = setInterval(() => {
+        //     $('#timer').text("Remaining Time: "+time);
+        //     // console.log("Remaining Time: "+time);
+        //     time-=1;
+        // }, 1000);
+
+        // if(time==0){
+        //     alert("ended");
+        //     clearInterval(timercount);
+        //     endGame("Game Over");
+        // }
+    function endGame(msg){
+        // alert("ended");
+        $('#mazeBody').hide();
+        $('#msg').text(msg);
+        var score = 60-moves;
+        $('#score').text("Score: "+score);
+        $.ajax({
+        url: 'save_score.php',
+        type: 'POST',
+        dataType: "json",
+        data: {
+            name: username,
+            highscore: score
+        },
+        success:function(response){
+           console.log("done");
+       },
+        error: function (response) {
+            console.log(response);
+        }
+        });
+
+    }
+       
     graph = []
     var path = [];
     for(var i=0; i<N*N; i++){
@@ -60,18 +201,18 @@
         // bottom-1, right-2, upper-4, left-8
         for(var i=0; i<4; i++){
             for(var j=0; j<4; j++){
-                var val = maze1[i][j]
+                var val = maze1[i][j]         
                 if(val>=8){                  //left
                     ctx.moveTo(x, y)
                     ctx.lineTo(x,y+width);
                     ctx.stroke();
-                    val-=8;
+                    val-=8;        
                 }
                 if(val>=4){             //upper
                     ctx.moveTo(x, y)
                     ctx.lineTo(x+width,y);
                     ctx.stroke();
-                    val-=4;
+                    val-=4;  
                 }
                 if(val>=2){             //right
                     ctx.moveTo(x+width, y)
@@ -137,6 +278,10 @@
         }
         return 1;
     }
+
+    function displayMoves(){
+        document.getElementById("moves").innerHTML = "Total moves: "+moves;
+    }
     
     function moveRunner(dir, performer = 'input'){
         if (dir=='D') { // DOWN
@@ -145,6 +290,7 @@
                 indRow+=1;
                 runnerY+=width;
                 drawRunner(runnerX, runnerY);
+                moves+=1;
                 if(performer=='input'){
                     undoStack.push(dir);
                     redoStack = [];
@@ -162,6 +308,7 @@
                 eraseRunner(runnerX, runnerY);
                 indRow-=1
                 runnerY-=width;
+                moves+=1;
                 drawRunner(runnerX, runnerY);
                 if(performer=='input'){
                     undoStack.push(dir);
@@ -180,6 +327,7 @@
                 eraseRunner(runnerX, runnerY);
                 indCol-=1;
                 runnerX-=width;
+                moves+=1;
                 drawRunner(runnerX, runnerY);
                 if(performer=='input'){
                     undoStack.push(dir);
@@ -198,6 +346,7 @@
                 eraseRunner(runnerX, runnerY);
                 indCol+=1;
                 runnerX+=width;
+                moves+=1;
                 drawRunner(runnerX, runnerY);
                 if(performer=='input'){
                     undoStack.push(dir);
@@ -210,6 +359,10 @@
                     redoStack.push(dir);
                 }
             }
+        }
+        displayMoves();
+        if(indRow==N-1 && indCol==N-1){
+            endGame("Congrats You Won!!!!");
         }
     }
 
@@ -355,6 +508,7 @@
         // console.log("redoStack:"+redoStack);
     });
 
+    });
     </script>
 
 </body>
