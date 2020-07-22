@@ -39,6 +39,7 @@
                     <label>Username</label>
                     <div id="usernamelabel"></div>
                     <input type="text" name="username" id = "username" class="form-control" required="required">
+                    <!-- <span id="inputError" style="color:red;"></span> -->
                 </div>
                 <input type="submit" id="loginBtn" class="btn btn-primary" value="Play">
             </form>
@@ -84,7 +85,6 @@
     }
     echo '<script>console.log('.json_encode($board).')</script>';
 
-
     $conn->close();
     ?>
 
@@ -119,13 +119,15 @@
 
     $('#mazeBody').hide();
     $('#loginBtn').click(function(e){
-        work = 1;
-        e.preventDefault();
-        $('#mazeBody').show();
-        username = $('#username').val();
-        $('#usernamelabel').text(username);
-        $('#username').remove();
-        $('#loginBtn').remove();
+        if($('#username').text()!==''){
+            work = 1;
+            e.preventDefault();
+            $('#mazeBody').show();
+            username = $('#username').val();
+            $('#usernamelabel').text(username);
+            $('#username').remove();
+            $('#loginBtn').remove();
+        }
     });
 
     var width = 100;
