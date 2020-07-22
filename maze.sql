@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 22, 2020 at 02:24 PM
+-- Generation Time: Jul 22, 2020 at 03:05 PM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.3.0
 
@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `highscore` (
+  `id` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `HighScore` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -37,72 +38,34 @@ CREATE TABLE `highscore` (
 -- Dumping data for table `highscore`
 --
 
-INSERT INTO `highscore` (`username`, `HighScore`) VALUES
-('rey', 54),
-('spirey', 40),
-('Raina', 54),
-('Jett', 36);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `score`
---
-
-CREATE TABLE `score` (
-  `user_id` int(11) NOT NULL,
-  `score` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
-  `Name` varchar(255) NOT NULL,
-  `username` varchar(256) NOT NULL,
-  `password` varchar(256) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+INSERT INTO `highscore` (`id`, `username`, `HighScore`) VALUES
+(1, 'rey', 100),
+(2, 'spirey', 40),
+(3, 'Raina', 54),
+(4, 'Jett', 36),
+(5, 'rey2', 98),
+(6, 'rey3', 98),
+(7, 'rey4', 100);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `score`
+-- Indexes for table `highscore`
 --
-ALTER TABLE `score`
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `username` (`username`);
+ALTER TABLE `highscore`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT for table `highscore`
 --
-ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `score`
---
-ALTER TABLE `score`
-  ADD CONSTRAINT `score_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+ALTER TABLE `highscore`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
