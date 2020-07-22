@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 22, 2020 at 02:16 PM
+-- Generation Time: Jul 22, 2020 at 02:24 PM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.3.0
 
@@ -40,7 +40,8 @@ CREATE TABLE `highscore` (
 INSERT INTO `highscore` (`username`, `HighScore`) VALUES
 ('rey', 54),
 ('spirey', 40),
-('Raina', 54);
+('Raina', 54),
+('Jett', 36);
 
 -- --------------------------------------------------------
 
