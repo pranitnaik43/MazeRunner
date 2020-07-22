@@ -99,12 +99,12 @@
         </thead>
         <tbody>
         <?php 
-            // echo json_encode($board);
-            foreach($board as $user)
-            echo '<tr>
-                    <td>'.$user["username"].'</td>
-                    <td>'.$user["HighScore"].'</td>
+            for($i=0; $i<count($board) && $i<5; $i++){
+                echo '<tr>
+                    <td>'.$board[$i]["username"].'</td>
+                    <td>'.$board[$i]["HighScore"].'</td>
                 </tr>';
+            }
         ?>
         </tbody>
   </table>
@@ -115,9 +115,11 @@
 
     var maze1 = new Array(new Array(13, 6, 12, 7),new Array(14, 10, 10, 15),new Array(8, 0, 1, 6),new Array(11, 9, 7, 11));
     var username;
+    var work = 0;
 
     $('#mazeBody').hide();
     $('#loginBtn').click(function(e){
+        work = 1;
         e.preventDefault();
         $('#mazeBody').show();
         username = $('#username').val();
@@ -143,24 +145,14 @@
     drawFinish();
     displayMoves();
 
-    
-        // var time = 10;
-        // var timercount = setInterval(() => {
-        //     $('#timer').text("Remaining Time: "+time);
-        //     // console.log("Remaining Time: "+time);
-        //     time-=1;
-        // }, 1000);
-
-        // if(time==0){
-        //     alert("ended");
-        //     clearInterval(timercount);
-        //     endGame("Game Over");
-        // }
     function endGame(msg){
         // alert("ended");
         $('#mazeBody').hide();
         $('#msg').text(msg);
-        var score = 60-moves;
+        var score = 106-moves;
+        if(score<0){
+            score=0
+        }
         $('#score').text("Score: "+score);
         $.ajax({
         url: 'save_score.php',
@@ -177,7 +169,6 @@
             console.log(response);
         }
         });
-
     }
        
     graph = []
@@ -430,19 +421,13 @@
         ctx.shadowBlur = 0;
 
         var ref = startPt+width/2
-        // var x=ref+(start%N)*width;
-        // var y=ref+Math.floor(start/N)*width;
         var nextnode, x, y;
-        // ctx.moveTo(x, y);
 
         for(var i=0; i<path.length; i++){
             nextnode = path[i];
-            // console.log(nextnode);
             ctx.beginPath();
             x = ref+(nextnode%N)*width;
             y = ref+Math.floor(nextnode/N)*width;
-            // ctx.lineTo(x2,y2);
-            // ctx.stroke();
             ctx.arc(x, y, 5, 0, 2 * Math.PI);
             ctx.fill();
         }
@@ -466,48 +451,46 @@
     }
 
     document.addEventListener('keydown', function(event) {
-        // console.log(event.key, event.keyCode);
-        if (event.keyCode === 40 || event.keyCode === 83) { // DOWN
-            moveRunner('D');
-        }
-        else if (event.keyCode === 38 || event.keyCode === 87) { // UP
-            moveRunner('U');
-        }
-        else if (event.keyCode === 37 || event.keyCode === 65) { // LEFT
-            moveRunner('L');
-        }
-        else if (event.keyCode === 39 || event.keyCode === 68) { // RIGHT
-            moveRunner('R');
-        }
-        else if (event.keyCode === 90) { // UNDO
-            if(undoStack.length>0){
-                var dir = undoStack.pop();
-                if(dir=='D') moveRunner('U', "undo");
-                else if(dir=='U') moveRunner('D', "undo");
-                else if(dir=='L') moveRunner('R', "undo");
-                else if(dir=='R') moveRunner('L', "undo");
+        if(work==1){
+            if (event.keyCode === 40 || event.keyCode === 83) { // DOWN
+                moveRunner('D');
+            }
+            else if (event.keyCode === 38 || event.keyCode === 87) { // UP
+                moveRunner('U');
+            }
+            else if (event.keyCode === 37 || event.keyCode === 65) { // LEFT
+                moveRunner('L');
+            }
+            else if (event.keyCode === 39 || event.keyCode === 68) { // RIGHT
+                moveRunner('R');
+            }
+            else if (event.keyCode === 90) { // UNDO
+                if(undoStack.length>0){
+                    var dir = undoStack.pop();
+                    if(dir=='D') moveRunner('U', "undo");
+                    else if(dir=='U') moveRunner('D', "undo");
+                    else if(dir=='L') moveRunner('R', "undo");
+                    else if(dir=='R') moveRunner('L', "undo");
+                }
+            }
+            else if (event.keyCode === 89) { // REDO
+                if(redoStack.length>0){
+                    var dir = redoStack.pop();
+                    if(dir=='D') moveRunner('U', "redo");
+                    else if(dir=='U') moveRunner('D', "redo");
+                    else if(dir=='L') moveRunner('R', "redo");
+                    else if(dir=='R') moveRunner('L', "redo");
+                }
+            }
+            else if (event.keyCode === 80) { // REDO
+                findSol();
+                drawSol();
+                setTimeout(function(){
+                    clearSol();
+                }, 2000);
             }
         }
-        else if (event.keyCode === 89) { // REDO
-            if(redoStack.length>0){
-                var dir = redoStack.pop();
-                if(dir=='D') moveRunner('U', "redo");
-                else if(dir=='U') moveRunner('D', "redo");
-                else if(dir=='L') moveRunner('R', "redo");
-                else if(dir=='R') moveRunner('L', "redo");
-            }
-        }
-        else if (event.keyCode === 80) { // REDO
-            findSol();
-            drawSol();
-            setTimeout(function(){
-                clearSol();
-            }, 2000);
-        }
-        // console.log("undoStack:"+undoStack);
-        // console.log("redoStack:"+redoStack);
     });
-
     });
     </script>
 
